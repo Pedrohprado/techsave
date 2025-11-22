@@ -31,7 +31,9 @@ export async function createUser(request: FastifyRequest, reply: FastifyReply) {
 
     await createGoals(goals, id);
 
-    return reply.send();
+    return reply.send({
+      id,
+    });
   } catch (error) {
     return reply.status(500).send({
       message: 'Erro interno no servidor',
