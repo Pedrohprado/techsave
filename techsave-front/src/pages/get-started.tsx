@@ -2,16 +2,20 @@ import { useEffect, useState } from "react";
 import GoalsPage from "./goals";
 import type { Goal } from "../types/goals";
 import { parseCurrencyToCents, formatCentsToBRL } from "../types/goals";
+import { useNavigate } from "react-router-dom";
 
 export function GetStarted() {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [age, setAge] = useState("");
     const [income, setIncome] = useState("");
+    const [money_saved, setMoneySaved] = useState("");
     const [goals, setGoals] = useState<Goal[]>([]);
 
     const [step, setStep] = useState(1);
     const totalSteps = 3;
+
+    const navigate = useNavigate();
 
     const validateEmail = (e: string) => /\S+@\S+\.\S+/.test(e);
     const isBasicFilled = name.trim() !== "" && validateEmail(email) && age.trim() !== "";
@@ -36,15 +40,59 @@ export function GetStarted() {
 
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
+        // map frontend goals to backend expected shape
+        const mapTerm = (t?: string | null) => {
+            if (!t) return null;
+            if (t === 'curto') return 'SHORT_TERM';
+            if (t === 'medio') return 'MEDIUM_TERM';
+            if (t === 'longo') return 'LONG_TERM';
+            return null;
+        };
+
+        const apiGoals = goals.map((g, i) => ({
+            goal: g.key || (g.customLabel ?? g.label ?? 'outros'),
+            primary: i === 0, // mark first selected goal as primary
+            value: g.value ?? undefined,
+            term: mapTerm(g.term) ?? undefined,
+        }));
+
         const payload = {
             name,
             email,
-            age: Number(age) || null,
-            income: parseCurrencyToCents(income) ?? null,
-            goals,
+            // backend schema expects age as string
+            age: String(age || ''),
+            // temporary generated password (backend requires a string)
+            password: Math.random().toString(36).slice(-10),
+            income: parseCurrencyToCents(income) ?? 0,
+            money_saved: money_saved ? parseCurrencyToCents(money_saved) ?? 0 : 0,
+            goals: apiGoals,
         };
 
-        alert("Dados preparados para envio:\n" + JSON.stringify(payload, null, 2));
+        // send to backend
+        (async () => {
+            try {
+                const res = await fetch('http://127.0.0.1:8080/api/user', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                });
+
+                if (!res.ok) {
+                    const text = await res.text();
+                    alert('Erro ao criar usuário: ' + res.status + '\n' + text);
+                    return;
+                }
+
+                alert('Usuário e metas criados com sucesso!');
+                navigate('/home');
+                // optionally reset or navigate away
+            } catch (err) {
+                // network or other error
+                // eslint-disable-next-line no-console
+                console.error(err);
+                alert('Erro ao conectar com o servidor');
+            }
+        })();
     }
 
     return (
@@ -93,6 +141,7 @@ export function GetStarted() {
                             />
 
                             {isBasicFilled && (
+                                <>
                                 <div className="mt-4">
                                     <label className="block text-sm font-medium text-slate-700">Renda</label>
                                     <input
@@ -103,6 +152,17 @@ export function GetStarted() {
                                     />
                                     <p className="text-xs text-slate-400 mt-1">Opcional, mas necessário para continuar.</p>
                                 </div>
+                                <div className="mt-4">
+                                    <label className="block text-sm font-medium text-slate-700">Dinheiro Economizado</label>
+                                    <input
+                                        value={money_saved}
+                                        onChange={(e) => setMoneySaved(e.target.value)}
+                                        className="mt-1 block w-full rounded-lg border border-slate-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-300"
+                                        placeholder="Ex: R$ 15.000"
+                                    />
+                                    <p className="text-xs text-slate-400 mt-1">Opcional, mas necessário para continuar.</p>
+                                </div>
+                                </>
                             )}
 
                             <div className="flex items-center justify-between mt-6">
