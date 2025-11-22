@@ -1,0 +1,60 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Term {
+  SHORT_TERM
+  MEDIUM_TERM
+  LONG_TERM
+}
+
+enum Type {
+  INCOME
+  EXPENSE
+}
+
+model User {
+  id             String        @id @default(uuid())
+  name           String
+  age            String
+  email          String
+  hashedPassword String
+  income         Int // salvo em centavos
+  money_saved    Int // salvo em centavos
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  goals          Goal[]
+  transactions   Transaction[]
+}
+
+model Goal {
+  id        String  @id @default(uuid())
+  goal      String
+  primary   Boolean @default(false)
+  value     Int? // salvo em centavos
+  term      Term
+  days_term Int? // salvo em dias
+  userId    String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Transaction {
+  id          String   @id @default(uuid())
+  type        Type
+  optional    Boolean  @default(true)
+  value       Int // salvo em centavos
+  description String?
+  inCash      Boolean  @default(true)
+  months      Int? // salvo em meses
+  date        DateTime
+  createdAt   DateTime @default(now())
+  userId      String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
