@@ -30,6 +30,7 @@ model User {
   updatedAt      DateTime      @updatedAt
   goals          Goal[]
   transactions   Transaction[]
+  memoryChats    MemoryChat[]
 }
 
 model Goal {
@@ -55,4 +56,12 @@ model Transaction {
   createdAt   DateTime @default(now())
   userId      Int
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model MemoryChat {
+  id          String   @id @default(uuid())
+  description String
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime
 }
