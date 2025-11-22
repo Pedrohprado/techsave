@@ -57,7 +57,7 @@ export const getRecentTransactions = createTool({
   },
 });
 
-export const getPreviousMessages = createTool({
+/* export const getPreviousMessages = createTool({
   id: "previous-messages",
   description:
     "Busca as últimas mensagens trocadas entre o usuário e o assistente financeiro.",
@@ -70,4 +70,4 @@ export const getPreviousMessages = createTool({
     });
     return messages;
   },
-});
+}); */

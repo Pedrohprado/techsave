@@ -2,13 +2,13 @@ import type { FastifyReply, FastifyRequest } from "fastify";
 import { mastra } from "../mastra/index.js";
 
 interface SendMessageBody {
-  userId: string;
+  userId: number;
   message: string;
 }
 
 export async function sendMessage(req: FastifyRequest, reply: FastifyReply) {
   try {
-    const { message } = req.body as SendMessageBody;
+    let { userId, message } = req.body as SendMessageBody;
 
     if (!message) {
       return reply.status(400).send({
@@ -16,13 +16,21 @@ export async function sendMessage(req: FastifyRequest, reply: FastifyReply) {
       });
     }
 
+    if (!userId) {
+      userId = 1;
+    }
+
     const agent = mastra.getAgent("financialAgent");
+
+    // Use userId como resourceId e threadId para manter memória de conversa por usuário
+    const resourceId = `user-${userId}`;
+    const threadId = `chat-${userId}`;
 
     const response = await agent.generate(
       [
         {
           role: "system",
-          content: `Você está conversando com o usuário ID: 1. Use as ferramentas disponíveis para buscar seus dados e personalizar a conversa.`,
+          content: `Você está conversando com o usuário ID: ${userId}. Use as ferramentas disponíveis para buscar seus dados e personalizar a conversa. Lembre-se do contexto das mensagens anteriores e não repita informações já discutidas.`,
         },
         {
           role: "user",
@@ -31,6 +39,8 @@ export async function sendMessage(req: FastifyRequest, reply: FastifyReply) {
       ],
       {
         maxSteps: 5,
+        threadId: threadId,
+        resourceId: resourceId,
       }
     );
 
