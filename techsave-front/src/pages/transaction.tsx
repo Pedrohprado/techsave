@@ -1,6 +1,10 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 
 export function Transaction() {
+    const navigate = useNavigate();
+    const [isLoading, setIsLoading] = useState(false);
     const [formData, setFormData] = useState({
         type: "entrada" as "entrada" | "saida",
         optional: false,
@@ -63,15 +67,101 @@ export function Transaction() {
         }
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Aqui você fará a chamada para a API
-        console.log("Dados do formulário:", {
-            ...formData,
-            value: parseCurrencyToCents(formData.value), // Já está em centavos
-            optional: formData.type === "entrada" ? false : formData.optional, // Entrada sempre false
-            months: formData.inCash ? undefined : parseInt(formData.months)
-        });
+
+        // Validações
+        if (!formData.date) {
+            alert('Por favor, informe a data da transação.');
+            return;
+        }
+
+        if (!formData.description.trim()) {
+            alert('Por favor, informe uma descrição.');
+            return;
+        }
+
+        // Converter os dados para o formato esperado pelo backend
+        const valueInCents = parseCurrencyToCents(formData.value);
+        if (valueInCents === 0) {
+            alert('Por favor, informe um valor válido.');
+            return;
+        }
+
+        if (!formData.inCash && (!formData.months || parseInt(formData.months) < 1)) {
+            alert('Por favor, informe o número de meses (mínimo 1).');
+            return;
+        }
+
+        setIsLoading(true);
+
+        try {
+            // Buscar userId das transações existentes (sistema só tem um usuário)
+            let userId: string | null = null;
+            try {
+                const transactionsRes = await fetch('http://127.0.0.1:8080/api/transaction');
+                if (transactionsRes.ok) {
+                    const transactions = await transactionsRes.json();
+                    if (transactions && transactions.length > 0) {
+                        userId = transactions[0].userId;
+                    }
+                }
+            } catch (err) {
+                console.error('Erro ao buscar transações:', err);
+            }
+
+            if (!userId) {
+                alert('Erro: Nenhum usuário encontrado. Por favor, crie um usuário primeiro.');
+                setIsLoading(false);
+                navigate('/get-started');
+                return;
+            }
+
+            const payload: {
+                type: "INCOME" | "EXPENSE";
+                optional: boolean;
+                value: number;
+                description: string;
+                inCash: boolean;
+                months?: number;
+                date: string;
+                userId: string;
+            } = {
+                type: formData.type === "entrada" ? "INCOME" : "EXPENSE",
+                optional: formData.type === "entrada" ? false : formData.optional,
+                value: valueInCents,
+                description: formData.description,
+                inCash: formData.inCash,
+                date: formData.date,
+                userId: userId
+            };
+
+            // Só adiciona months se não for à vista
+            if (!formData.inCash && formData.months) {
+                payload.months = parseInt(formData.months);
+            }
+
+            const res = await fetch('http://127.0.0.1:8080/api/transaction', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            });
+
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => ({ message: 'Erro desconhecido' }));
+                alert('Erro ao criar transação: ' + (errorData.message || res.status));
+                setIsLoading(false);
+                return;
+            }
+
+            await res.json();
+            alert('Transação criada com sucesso!');
+            navigate('/home');
+        } catch (err) {
+            console.error(err);
+            alert('Erro ao conectar com o servidor');
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -79,6 +169,13 @@ export function Transaction() {
             <div className="max-w-md mx-auto px-4 pt-6">
                 {/* Header */}
                 <div className="mb-6">
+                    <button
+                        onClick={() => navigate('/home')}
+                        className="flex items-center gap-2 text-gray-600 hover:text-gray-800 mb-4 transition-colors"
+                    >
+                        <ArrowLeft className="w-5 h-5" />
+                        <span className="text-sm font-medium">Voltar para Home</span>
+                    </button>
                     <h1 className="text-2xl font-bold text-gray-800 mb-2">Nova Transação</h1>
                     <p className="text-sm text-gray-600">Registre uma nova entrada ou saída</p>
                 </div>
@@ -273,9 +370,10 @@ export function Transaction() {
                         </button>
                         <button
                             type="submit"
-                            className="flex-1 px-4 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors shadow-md"
+                            disabled={isLoading}
+                            className="flex-1 px-4 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            Salvar
+                            {isLoading ? "Salvando..." : "Salvar"}
                         </button>
                     </div>
                 </form>
