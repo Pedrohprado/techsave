@@ -83,6 +83,11 @@ export function GetStarted() {
                     return;
                 }
 
+                const data = await res.json();
+                if (data.id) {
+                    localStorage.setItem('userId', String(data.id));
+                }
+
                 alert('Usuário e metas criados com sucesso!');
                 navigate('/home');
                 // optionally reset or navigate away
