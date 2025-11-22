@@ -10,6 +10,7 @@ import {
     DialogTitle,
     DialogDescription,
 } from "@/components/ui/dialog";
+import { useNavigate } from "react-router-dom";
 
 function formatCurrency(cents: number) {
     return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(cents / 100);
@@ -21,19 +22,11 @@ function formatDate(d: Date) {
 
 export function Home() {
     const [items, setItems] = React.useState<Transaction[]>(() => Object.values([] as unknown as Record<string, Transaction>));
-    const [month, setMonth] = React.useState<string>(() => {
-        const now = new Date();
-        const y = now.getFullYear();
-        const m = String(now.getMonth() + 1).padStart(2, "0");
-        return `${y}-${m}`;
-    });
+    const API_BASE = ((import.meta.env.VITE_API_URL as string) ?? "http://127.0.0.1:8080") + "/api";
 
-    const API_BASE = ((import.meta.env.VITE_API_URL as string) ?? "http://127.0.0.1:3000") + "/api";
-
-    async function loadTransactions(monthQuery?: string) {
+    async function loadTransactions() {
         try {
-            const qs = monthQuery ? `?month=${encodeURIComponent(monthQuery)}` : "";
-            const res = await fetch(`${API_BASE}/transaction${qs}`);
+            const res = await fetch(`${API_BASE}/transaction`);
             if (!res.ok) {
                 console.error("Erro ao buscar transactions", res.statusText);
                 return;
@@ -49,16 +42,23 @@ export function Home() {
                 months: d.months ?? undefined,
                 date: new Date(d.date),
                 createdAt: new Date(d.createdAt),
+                userId: d.userId,
             }));
-            setItems(mapped);
+            // If a user id is provided via env, filter client-side so backend is untouched
+            const FRONT_USER_ID = (import.meta.env.VITE_USER_ID as string) ?? undefined;
+            if (FRONT_USER_ID) {
+                setItems(mapped.filter((m) => m.userId === FRONT_USER_ID));
+            } else {
+                setItems(mapped);
+            }
         } catch (err) {
             console.error(err);
         }
     }
 
     React.useEffect(() => {
-        void loadTransactions(month);
-    }, [month]);
+        void loadTransactions();
+    }, []);
     const [open, setOpen] = React.useState(false);
     const [messages, setMessages] = React.useState<Array<{ id: string; from: string; text: string }>>([
         { id: "m1", from: "agent", text: "Olá! Em que posso ajudar hoje?" },
@@ -77,7 +77,11 @@ export function Home() {
 
     const userName = "Vanderlei";
     const balanceCents = items.reduce((acc, t) => acc + (t.type === "entrada" ? t.value : -t.value), 0);
-    const monthLabel = new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric" }).format(new Date(`${month}-01`));
+    const monthLabel = new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric" }).format(new Date());
+
+    const navigate = useNavigate()
+
+
 
     return (
         <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -105,15 +109,7 @@ export function Home() {
                 </CardHeader>
 
                 <CardContent>
-                    <div className="flex items-center gap-2 mb-3">
-                        <label className="text-xs text-muted-foreground">Mês:</label>
-                        <input
-                            type="month"
-                            value={month}
-                            onChange={(e) => setMonth(e.target.value)}
-                            className="rounded-md border px-2 py-1"
-                        />
-                    </div>
+                        {/* month input removed — fetching all transactions from backend */}
                     <ul className="flex flex-col gap-3">
                         {items.map((tx) => (
                             <li
@@ -127,7 +123,7 @@ export function Home() {
                                             {tx.description}
                                         </span>
                                     </span>
-                                    <span className="text-xs text-muted-foreground truncate">{formatDate(tx.date)}</span>
+                                    <span className="text-xs text-muted-foreground truncate">{formatDate(tx.createdAt)}</span>
                                 </div>
 
                                 <div className="flex flex-col items-end gap-1 shrink-0 w-24 sm:w-32">
@@ -151,7 +147,7 @@ export function Home() {
 
                 <div className="flex justify-between gap-2 p-4">
                     <CardFooter>
-                        <button className="inline-flex items-center gap-2 justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:opacity-90">
+                        <button onClick={() => {navigate('/transacao')}} className="inline-flex items-center gap-2 justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:opacity-90">
                             Adicionar gastos
                             <CirclePlus />
                         </button>
