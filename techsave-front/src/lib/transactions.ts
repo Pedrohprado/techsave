@@ -3,12 +3,12 @@ export type TransactionType = "entrada" | "saida";
 export interface Transaction {
   id: string;
   type: TransactionType;
-  optional?: boolean; // Se for true, futuramente ele pode ser removido
-  value: number; // centavos
+  optional?: boolean;
+  value: number; 
   description: string;
-  inCash: boolean; // à vista (true) ou a prazo (false)
-  months?: number; // caso inCash seja false, número de meses
-  date: Date; // data que a transação ocorrerá
+  inCash: boolean;
+  months?: number;
+  date: Date;
   createdAt: Date;
 }
 
@@ -17,7 +17,7 @@ export const transactions: Record<string, Transaction> = {
     id: "tx_001",
     type: "entrada",
     optional: false,
-    value: 500000, // R$5.000,00
+    value: 500000,
     description: "Salário mensal",
     inCash: true,
     date: new Date("2025-11-30"),
@@ -28,7 +28,7 @@ export const transactions: Record<string, Transaction> = {
     id: "tx_002",
     type: "saida",
     optional: false,
-    value: 150000, // R$1.500,00
+    value: 150000,
     description: "Aluguel",
     inCash: false,
     months: 12,
@@ -51,7 +51,7 @@ export const transactions: Record<string, Transaction> = {
     id: "tx_004",
     type: "saida",
     optional: false,
-    value: 200000, // R$2.000,00
+    value: 200000,
     description: "Compra de celular (parcelado)",
     inCash: false,
     months: 10,
@@ -63,7 +63,7 @@ export const transactions: Record<string, Transaction> = {
     id: "tx_005",
     type: "entrada",
     optional: false,
-    value: 120000, // R$1.200,00
+    value: 120000,
     description: "Projeto freelance",
     inCash: true,
     date: new Date("2025-11-28"),
@@ -74,7 +74,7 @@ export const transactions: Record<string, Transaction> = {
     id: "tx_006",
     type: "saida",
     optional: true,
-    value: 2999, // R$29,99
+    value: 2999,
     description: "Assinatura streaming",
     inCash: true,
     date: new Date("2025-11-25"),

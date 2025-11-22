@@ -1,5 +1,5 @@
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
-import { CirclePlus, MessageCircle } from "lucide-react";
+import { CirclePlus, MessageCircle, User, X } from "lucide-react";
 import transactions from "@/lib/transactions";
 import React from "react";
 import {
@@ -32,15 +32,35 @@ export function Home() {
         const msg = { id: String(Date.now()), from: "user", text: input.trim() };
         setMessages((s) => [...s, msg]);
         setInput("");
-        // Simular resposta do agente após um pequeno delay
         setTimeout(() => {
             setMessages((s) => [...s, { id: String(Date.now() + 1), from: "agent", text: "Recebi sua mensagem — vou analisar." }]);
         }, 700);
     }
 
+    const userName = "Vanderlei";
+    const balanceCents = items.reduce((acc, t) => acc + (t.type === "entrada" ? t.value : -t.value), 0);
+    const monthLabel = new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric" }).format(new Date());
+
     return (
         <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
             <Card className="w-full max-w-md mx-auto">
+                <div className="flex items-center justify-between gap-4 px-4 py-3">
+                    <div className="flex items-center gap-3">
+                        <div className="rounded-full bg-primary p-2 text-white">
+                            <User className="w-5 h-5" />
+                        </div>
+                        <div className="flex flex-col">
+                            <span className="text-sm font-medium">Olá, {userName}</span>
+                            <span className="text-xs text-muted-foreground">Bem-vindo de volta</span>
+                        </div>
+                    </div>
+
+                    <div className="flex flex-col items-end">
+                        <span className="text-sm text-muted-foreground">{monthLabel}</span>
+                        <span className="text-lg font-semibold">{formatCurrency(balanceCents)}</span>
+                    </div>
+                </div>
+
                 <CardHeader>
                     <CardTitle>TechSave</CardTitle>
                     <CardDescription>Visão das transações</CardDescription>
@@ -101,7 +121,16 @@ export function Home() {
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                         <DialogContent>
                             <DialogHeader>
-                                <DialogTitle>Converse com o agente</DialogTitle>
+                                <div className="flex items-start justify-between">
+                                    <DialogTitle>Converse com o agente</DialogTitle>
+                                    <button
+                                        onClick={() => setOpen(false)}
+                                        aria-label="Fechar chat"
+                                        className="rounded-md p-1 hover:bg-gray-100"
+                                    >
+                                        <X className="h-4 w-4" />
+                                    </button>
+                                </div>
                             </DialogHeader>
                             <DialogDescription>
                                 <div className="flex flex-col gap-3 max-h-64 overflow-auto">
