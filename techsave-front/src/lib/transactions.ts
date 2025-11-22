@@ -10,6 +10,7 @@ export interface Transaction {
   months?: number;
   date: Date;
   createdAt: Date;
+  userId?: string;
 }
 
 export const transactions: Record<string, Transaction> = {

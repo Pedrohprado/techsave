@@ -171,7 +171,7 @@ export function Transaction() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 pb-8">
+        <div className="min-h-screen from-blue-50 to-indigo-100 pb-8">
             <div className="max-w-md mx-auto px-4 pt-6">
                 {/* Header */}
                 <div className="mb-6">
