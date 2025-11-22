@@ -1,8 +1,6 @@
 # packages
 node_modules
-
 # environment
 .env
-
 # production
 dist

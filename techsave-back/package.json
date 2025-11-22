@@ -4,7 +4,6 @@
   "description": "",
   "main": "server.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "npx tsx src/server.ts",
     "build": "tsup src",
     "start": "node dist/server.cjs"
@@ -17,8 +16,12 @@
     "@fastify/cors": "^11.1.0",
     "@fastify/swagger": "^9.6.1",
     "@fastify/swagger-ui": "^5.2.3",
+    "@prisma/client": "^6.16.3",
     "dotenv": "^17.2.3",
     "fastify": "^5.6.2",
+    "prisma": "^6.16.3",
+    "tsup": "^8.5.1",
+    "tsx": "^4.20.6",
     "zod": "^4.1.12"
   },
   "devDependencies": {

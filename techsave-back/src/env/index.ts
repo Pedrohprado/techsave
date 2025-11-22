@@ -4,7 +4,7 @@ const dotenvSchema = z.object({
   HOST: z.string().default('127.0.0.1'),
   PORT: z.string().default('3000'),
 
-  //DATABASE_URL: z.string(),
+  DATABASE_URL: z.string(),
 });
 
 const _env = dotenvSchema.safeParse(process.env);
