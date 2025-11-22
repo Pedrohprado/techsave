@@ -79,16 +79,18 @@ export function Home() {
                                 </div>
 
                                 <div className="flex items-center gap-3">
-                                    <span
-                                        className={
-                                            "rounded-full px-3 py-1 text-xs font-semibold " +
-                                            (tx.type === "entrada" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800")
-                                        }
-                                    >
-                                        {tx.type}
-                                    </span>
+                                    <div className="w-20 flex justify-center">
+                                        <span
+                                            className={
+                                                "inline-block rounded-full px-3 py-1 text-xs font-semibold text-center " +
+                                                (tx.type === "entrada" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800")
+                                            }
+                                        >
+                                            {tx.type}
+                                        </span>
+                                    </div>
 
-                                    <div className="text-right">
+                                    <div className="text-right min-w-[90px]">
                                         <div className="text-sm font-medium">{formatCurrency(tx.value)}</div>
                                         {tx.optional && <div className="text-xs text-muted-foreground">Opcional</div>}
                                     </div>
