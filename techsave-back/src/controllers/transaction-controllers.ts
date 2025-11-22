@@ -14,7 +14,7 @@ export async function listTransactions(
 
     const transactions = await getTransactions(month);
 
-    return reply.status(200).send({ transactions });
+    return reply.status(200).send(transactions);
   } catch (error) {
     return reply.status(500).send({
       message: "Erro interno do servidor",
