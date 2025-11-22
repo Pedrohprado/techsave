@@ -19,7 +19,7 @@ enum Type {
 }
 
 model User {
-  id             String        @id @default(uuid())
+  id             Int           @id @default(autoincrement())
   name           String
   age            String
   email          String
@@ -39,7 +39,7 @@ model Goal {
   value     Int? // salvo em centavos
   term      Term
   days_term Int? // salvo em dias
-  userId    String
+  userId    Int
   user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
@@ -53,7 +53,6 @@ model Transaction {
   months      Int? // salvo em meses
   date        DateTime
   createdAt   DateTime @default(now())
-  userId      String
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

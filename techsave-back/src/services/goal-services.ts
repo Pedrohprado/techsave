@@ -34,7 +34,7 @@ function checkDaysTerms(term: string) {
   }
 }
 
-export async function createGoals(goals: GoalsProps[], userId: string) {
+export async function createGoals(goals: GoalsProps[], userId: number) {
   for (const goal of goals) {
     const { days_term } = checkDaysTerms(goal.term);
 
