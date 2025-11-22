@@ -2,7 +2,7 @@ import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import swagger from '@fastify/swagger';
 import swaggerUI from '@fastify/swagger-ui';
-import 'dotenv/config'
+import 'dotenv/config';
 import mainRoute from './routes/main-routes.js';
 
 const app = Fastify();
