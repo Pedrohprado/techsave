@@ -29,7 +29,7 @@ export async function saveTransaction(transactionData: CreateTransaction) {
       description: transactionData.description || null,
       inCash: transactionData.inCash,
       months: transactionData.months || null,
-      date: transactionData.date,
+      date: new Date(transactionData.date),
       userId: transactionData.userId,
     },
   });

@@ -96,18 +96,24 @@ export function Transaction() {
         setIsLoading(true);
 
         try {
-            // Buscar userId das transações existentes (sistema só tem um usuário)
-            let userId: string | null = null;
-            try {
-                const transactionsRes = await fetch('http://127.0.0.1:8080/api/transaction');
-                if (transactionsRes.ok) {
-                    const transactions = await transactionsRes.json();
-                    if (transactions && transactions.length > 0) {
-                        userId = transactions[0].userId;
+            // Buscar userId do localStorage (salvo ao criar usuário)
+            let userId: string | null = localStorage.getItem('userId');
+            
+            // Se não tiver no localStorage, tenta buscar das transações existentes
+            if (!userId) {
+                try {
+                    const transactionsRes = await fetch('http://127.0.0.1:8080/api/transaction');
+                    if (transactionsRes.ok) {
+                        const transactions = await transactionsRes.json();
+                        if (transactions && transactions.length > 0) {
+                            userId = String(transactions[0].userId);
+                            // Salva no localStorage para próximas vezes
+                            localStorage.setItem('userId', userId);
+                        }
                     }
+                } catch (err) {
+                    console.error('Erro ao buscar transações:', err);
                 }
-            } catch (err) {
-                console.error('Erro ao buscar transações:', err);
             }
 
             if (!userId) {
