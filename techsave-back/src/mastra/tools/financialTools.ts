@@ -1,13 +1,14 @@
 import { createTool } from "@mastra/core";
 import { z } from "zod";
 import { prisma } from "../../config/prisma.js";
+import { create } from "domain";
 
 export const getUserProfile = createTool({
   id: "user-profile",
   description:
     "Busca o nome, idade, renda mensal e dinheiro guardado do usuário. Valores monetários estão em centavos.",
   inputSchema: z.object({
-    userId: z.string().describe("O ID do usuário logado"),
+    userId: z.number().describe("O ID do usuário logado"),
   }),
   execute: async ({ context }) => {
     const user = await prisma.user.findUnique({
@@ -23,7 +24,7 @@ export const getUserGoals = createTool({
   description:
     "Busca a lista de objetivos financeiros do usuário, incluindo prazo e valor alvo.",
   inputSchema: z.object({
-    userId: z.string().describe("O ID do usuário logado"),
+    userId: z.number().describe("O ID do usuário logado"),
   }),
   execute: async ({ context }) => {
     const goals = await prisma.goal.findMany({
@@ -38,7 +39,7 @@ export const getRecentTransactions = createTool({
   description:
     "Busca as transações dos últimos 30 dias para analisar o fluxo de caixa.",
   inputSchema: z.object({
-    userId: z.string().describe("O ID do usuário logado"),
+    userId: z.number().describe("O ID do usuário logado"),
   }),
   execute: async ({ context }) => {
     const today = new Date();
@@ -53,5 +54,20 @@ export const getRecentTransactions = createTool({
       orderBy: { date: "desc" },
     });
     return transactions;
+  },
+});
+
+export const getPreviousMessages = createTool({
+  id: "previous-messages",
+  description:
+    "Busca as últimas mensagens trocadas entre o usuário e o assistente financeiro.",
+  inputSchema: z.object({
+    userId: z.number().describe("O ID do usuário logado"),
+  }),
+  execute: async ({ context }) => {
+    const messages = await prisma.memoryChat.findMany({
+      where: { userId: context.userId },
+    });
+    return messages;
   },
 });

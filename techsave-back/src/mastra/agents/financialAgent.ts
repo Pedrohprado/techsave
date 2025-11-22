@@ -3,9 +3,9 @@ import {
   getUserProfile,
   getUserGoals,
   getRecentTransactions,
+  getPreviousMessages,
 } from "../tools/financialTools.js";
 import { Memory } from "@mastra/memory";
-import { LibSQLStore } from "@mastra/libsql";
 
 export const financialAgent = new Agent({
   name: "Financial Planner",
@@ -24,13 +24,24 @@ export const financialAgent = new Agent({
     3. Olhe para os Objetivos (Goals):
        - Priorize os marcados como 'primary'.
        - Verifique se o prazo ('term' ou 'days_term') é realista com o ritmo de economia atual.
+    4. Considere as mensagens anteriores para entender o contexto e preferências do usuário e para não ficar repetindo as informações do usuário caso já tenham sido ditas.
+    5. Crie um Plano Financeiro Personalizado:
+       - Defina metas de economia mensais.
+       - Sugira ajustes de gastos baseados nas transações 'optional' (opcionais).
+       - Recomende investimentos ou cortes, se necessário.
+    6. Apresente o plano de forma clara e motivadora.
     
     **ESTILO DE RESPOSTA:**
     - Seja encorajador, mas realista.
     - Se o usuário não tiver dinheiro sobrando, sugira cortes baseados nas transações 'optional' (opcionais).
     - Use tabelas ou listas para facilitar a leitura dos planos.
   `,
-  tools: [getUserGoals, getUserProfile, getRecentTransactions],
+  tools: [
+    getUserGoals,
+    getUserProfile,
+    getRecentTransactions,
+    getPreviousMessages,
+  ],
   memory: new Memory({
     options: {
       lastMessages: 20, // Mantém as últimas 10 mensagens
