@@ -1,7 +1,7 @@
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { CirclePlus, MessageCircle, User, X } from "lucide-react";
-import transactions from "@/lib/transactions";
 import React from "react";
+import type { Transaction } from "@/lib/transactions";
 import {
     Dialog,
     DialogOverlay,
@@ -20,7 +20,45 @@ function formatDate(d: Date) {
 }
 
 export function Home() {
-    const items = Object.values(transactions);
+    const [items, setItems] = React.useState<Transaction[]>(() => Object.values([] as unknown as Record<string, Transaction>));
+    const [month, setMonth] = React.useState<string>(() => {
+        const now = new Date();
+        const y = now.getFullYear();
+        const m = String(now.getMonth() + 1).padStart(2, "0");
+        return `${y}-${m}`;
+    });
+
+    const API_BASE = ((import.meta.env.VITE_API_URL as string) ?? "http://127.0.0.1:3000") + "/api";
+
+    async function loadTransactions(monthQuery?: string) {
+        try {
+            const qs = monthQuery ? `?month=${encodeURIComponent(monthQuery)}` : "";
+            const res = await fetch(`${API_BASE}/transaction${qs}`);
+            if (!res.ok) {
+                console.error("Erro ao buscar transactions", res.statusText);
+                return;
+            }
+            const data = await res.json();
+            const mapped: Transaction[] = data.map((d: any) => ({
+                id: d.id,
+                type: d.type === "INCOME" ? "entrada" : "saida",
+                optional: d.optional,
+                value: d.value,
+                description: d.description || "",
+                inCash: d.inCash,
+                months: d.months ?? undefined,
+                date: new Date(d.date),
+                createdAt: new Date(d.createdAt),
+            }));
+            setItems(mapped);
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    React.useEffect(() => {
+        void loadTransactions(month);
+    }, [month]);
     const [open, setOpen] = React.useState(false);
     const [messages, setMessages] = React.useState<Array<{ id: string; from: string; text: string }>>([
         { id: "m1", from: "agent", text: "Olá! Em que posso ajudar hoje?" },
@@ -39,7 +77,7 @@ export function Home() {
 
     const userName = "Vanderlei";
     const balanceCents = items.reduce((acc, t) => acc + (t.type === "entrada" ? t.value : -t.value), 0);
-    const monthLabel = new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric" }).format(new Date());
+    const monthLabel = new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric" }).format(new Date(`${month}-01`));
 
     return (
         <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -67,33 +105,44 @@ export function Home() {
                 </CardHeader>
 
                 <CardContent>
+                    <div className="flex items-center gap-2 mb-3">
+                        <label className="text-xs text-muted-foreground">Mês:</label>
+                        <input
+                            type="month"
+                            value={month}
+                            onChange={(e) => setMonth(e.target.value)}
+                            className="rounded-md border px-2 py-1"
+                        />
+                    </div>
                     <ul className="flex flex-col gap-3">
                         {items.map((tx) => (
                             <li
                                 key={tx.id}
-                                className="flex items-center justify-between gap-3 px-2 py-3 rounded-md bg-white/60 shadow-sm"
+                                className="flex items-center justify-between gap-3 px-2 py-3 rounded-md bg-white/60 shadow-sm w-full overflow-hidden"
                             >
-                                <div className="flex flex-col">
-                                    <span className="text-sm font-medium">{tx.description}</span>
-                                    <span className="text-xs text-muted-foreground">{formatDate(tx.date)}</span>
+                                <div className="flex flex-col min-w-0">
+                                    <span className="group relative text-sm font-medium truncate" title={tx.description}>
+                                        {tx.description}
+                                        <span className="pointer-events-none absolute left-0 -bottom-8 hidden group-hover:block z-10 max-w-xs truncate whitespace-nowrap rounded bg-black/80 px-2 py-1 text-xs text-white shadow">
+                                            {tx.description}
+                                        </span>
+                                    </span>
+                                    <span className="text-xs text-muted-foreground truncate">{formatDate(tx.date)}</span>
                                 </div>
 
-                                <div className="flex items-center gap-3">
-                                    <div className="w-20 flex justify-center">
-                                        <span
-                                            className={
-                                                "inline-block rounded-full px-3 py-1 text-xs font-semibold text-center " +
-                                                (tx.type === "entrada" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800")
-                                            }
-                                        >
-                                            {tx.type}
-                                        </span>
-                                    </div>
+                                <div className="flex flex-col items-end gap-1 shrink-0 w-24 sm:w-32">
+                                    <div className="text-sm font-medium truncate">{formatCurrency(tx.value)}</div>
 
-                                    <div className="text-right min-w-[90px]">
-                                        <div className="text-sm font-medium">{formatCurrency(tx.value)}</div>
-                                        {tx.optional && <div className="text-xs text-muted-foreground">Opcional</div>}
-                                    </div>
+                                    <span
+                                        className={
+                                            "inline-block rounded-full px-2 py-1 text-xs font-semibold text-center whitespace-nowrap " +
+                                            (tx.type === "entrada" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800")
+                                        }
+                                    >
+                                        {tx.type}
+                                    </span>
+
+                                    {tx.optional && <div className="text-xs text-muted-foreground">Opcional</div>}
                                 </div>
                             </li>
                         ))}
