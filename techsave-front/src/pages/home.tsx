@@ -151,19 +151,19 @@ export function Home() {
                             </DialogDescription>
 
                             <div className="px-4 pb-4 pt-2">
-                                <div className="flex gap-2">
+                                <div className="flex gap-2 items-center">
                                     <input
                                         value={input}
                                         onChange={(e) => setInput(e.target.value)}
                                         onKeyDown={(e) => {
                                             if (e.key === "Enter") handleSend();
                                         }}
-                                        className="flex-1 rounded-md border px-3 py-2"
+                                        className="flex-1 min-w-0 rounded-md border px-3 py-2"
                                         placeholder="Escreva sua mensagem..."
                                     />
                                     <button
                                         onClick={handleSend}
-                                        className="rounded-md bg-primary px-4 py-2 text-white"
+                                        className="rounded-md bg-primary sm:px-4 px-3 py-2 text-white whitespace-nowrap"
                                     >
                                         Enviar
                                     </button>
