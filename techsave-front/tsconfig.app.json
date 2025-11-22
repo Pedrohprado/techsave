@@ -8,6 +8,15 @@
     "types": ["vite/client"],
     "skipLibCheck": true,
 
+    /* Adição para o shadcn/ui */
+    "baseUrl": ".", // Define a raiz para resolver caminhos
+    "paths": {      // Define o alias @/
+      "@/*": [
+        "./src/*"
+      ]
+    },
+    /* Fim da adição */
+
     /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
