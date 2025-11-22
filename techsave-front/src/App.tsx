@@ -7,8 +7,8 @@ import { Transaction } from "./pages/transaction";
 export default function App() {
   return (
     <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/get-started" element={<GetStarted />} />
+      <Route path="/" element={<GetStarted />} />
+      <Route path="/home" element={<Home />} />
       <Route path="/transacao" element={<Transaction />} />
     </Routes>
   );

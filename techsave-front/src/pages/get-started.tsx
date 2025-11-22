@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import GoalsPage from "./goals";
 import type { Goal } from "../types/goals";
-import { parseCurrencyToCents } from "../types/goals";
+import { parseCurrencyToCents, formatCentsToBRL } from "../types/goals";
 
 export function GetStarted() {
     const [name, setName] = useState("");
@@ -153,7 +153,7 @@ export function GetStarted() {
                                             {goals.map((g, i) => (
                                                 <li key={i} className="flex items-center justify-between">
                                                     <span>{g.key === "outros" ? g.customLabel || "outros" : g.label}</span>
-                                                    <span className="text-slate-500">{g.value ? `R$ ${g.value}` : "sem valor"} • {g.term || "-"}</span>
+                                                      <span className="text-slate-500">{g.value != null ? formatCentsToBRL(g.value) : "sem valor"} • {g.term || "-"}</span>
                                                 </li>
                                             ))}
                                         </ul>

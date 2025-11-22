@@ -60,3 +60,14 @@ export function mapUiGoalsToApi(goalsUi: Array<any>): Goal[] {
     } as Goal;
   });
 }
+
+export function formatCentsToBRL(cents?: number | null): string | null {
+  if (cents === null || cents === undefined) return null;
+  const reais = cents / 100;
+  try {
+    return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(reais);
+  } catch {
+    // fallback
+    return `R$ ${reais.toFixed(2)}`;
+  }
+}
