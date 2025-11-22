@@ -2,7 +2,7 @@ import { createTool } from "@mastra/core";
 import { z } from "zod";
 import { prisma } from "../../config/prisma.js";
 
-export const getUserProfileTool = createTool({
+export const getUserProfile = createTool({
   id: "user-profile",
   description:
     "Busca o nome, idade, renda mensal e dinheiro guardado do usuário. Valores monetários estão em centavos.",
@@ -18,7 +18,7 @@ export const getUserProfileTool = createTool({
   },
 });
 
-export const getUserGoalsTool = createTool({
+export const getUserGoals = createTool({
   id: "user-goals",
   description:
     "Busca a lista de objetivos financeiros do usuário, incluindo prazo e valor alvo.",
@@ -33,7 +33,7 @@ export const getUserGoalsTool = createTool({
   },
 });
 
-export const getRecentTransactionsTool = createTool({
+export const getRecentTransactions = createTool({
   id: "recent-transactions",
   description:
     "Busca as transações dos últimos 30 dias para analisar o fluxo de caixa.",

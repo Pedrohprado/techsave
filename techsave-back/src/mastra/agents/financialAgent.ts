@@ -1,10 +1,11 @@
 import { Agent } from "@mastra/core/agent";
 import {
-  getUserProfileTool,
-  getUserGoalsTool,
-  getRecentTransactionsTool,
+  getUserProfile,
+  getUserGoals,
+  getRecentTransactions,
 } from "../tools/financialTools.js";
 import { Memory } from "@mastra/memory";
+import { LibSQLStore } from "@mastra/libsql";
 
 export const financialAgent = new Agent({
   name: "Financial Planner",
@@ -29,10 +30,10 @@ export const financialAgent = new Agent({
     - Se o usuário não tiver dinheiro sobrando, sugira cortes baseados nas transações 'optional' (opcionais).
     - Use tabelas ou listas para facilitar a leitura dos planos.
   `,
-  tools: [getUserGoalsTool, getUserProfileTool, getRecentTransactionsTool],
+  tools: [getUserGoals, getUserProfile, getRecentTransactions],
   memory: new Memory({
     options: {
-      lastMessages: 20,
+      lastMessages: 20, // Mantém as últimas 10 mensagens
     },
   }),
 });

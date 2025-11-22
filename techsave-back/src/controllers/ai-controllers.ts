@@ -1,5 +1,5 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
-import { financialAgent } from "../mastra/agents/financialAgent.js";
+import { mastra } from "../mastra/index.js";
 
 interface SendMessageBody {
   userId: string;
@@ -16,7 +16,23 @@ export async function sendMessage(req: FastifyRequest, reply: FastifyReply) {
       });
     }
 
-    const response = await financialAgent.generate(message);
+    const agent = mastra.getAgent("financialAgent");
+
+    const response = await agent.generate(
+      [
+        {
+          role: "system",
+          content: `Você está conversando com o usuário ID: 1. Use as ferramentas disponíveis para buscar seus dados e personalizar a conversa.`,
+        },
+        {
+          role: "user",
+          content: message,
+        },
+      ],
+      {
+        maxSteps: 5,
+      }
+    );
 
     return reply.send({
       success: true,
